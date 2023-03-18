@@ -18,6 +18,7 @@ IR_c = Pin(28, Pin.IN)
 motors = MotorPair()
 encoder = EncoderPair()
 
+# Main loop of robot
 while True:
     motors.duty(50, 50)
     encoder.reset()
