@@ -18,10 +18,8 @@ IR_c = Pin(28, Pin.IN)
 motors = MotorPair()
 encoder = EncoderPair()
 
-
+# Main Loop
 while True:
     motors.duty(50, 50)
     encoder.reset()
 
-# This is code
-# Are you sure? I'm pretty sure the code is ^^^
