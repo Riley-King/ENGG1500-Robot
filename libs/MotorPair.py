@@ -1,4 +1,4 @@
-import motorLib
+import libs.motorLib as motorLib
 
 # WARNING: left and right motor pins are hard-coded in the class!!!
 class MotorPair:
@@ -7,8 +7,8 @@ class MotorPair:
         #   as to enable fast and efficient changes of its value
         self.pwm_l = 50
         self.pwm_r = 50
-        self.left_motor = motorLib.Motor(8, 9, 6)
-        self.right_motor = motorLib.Motor(11, 10, 7)
+        self.left_motor = motorLib.Motor("left", 8, 9, 6)
+        self.right_motor = motorLib.Motor("right", 11, 10, 7)
 
     # Sets/Gets the pwm class variables.
     # If not arguments are provided, returns pwm_l, pwm_r

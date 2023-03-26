@@ -1,4 +1,4 @@
-import ultrasonicLib
+import libs.ultrasonicLib as ultrasonicLib
 US = ultrasonicLib.sonic(17, 18)
 
 def dist_mm():

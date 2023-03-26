@@ -1,4 +1,4 @@
-import encoderLib
+import libs.encoderLib as encoderLib
 
 
 # WARNING! Pin values are hard coded in constructor!
