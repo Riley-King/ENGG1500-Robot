@@ -1,3 +1,5 @@
+import time
+
 from machine import Pin, I2C
 from libs.ssd1306 import SSD1306_I2C
 
@@ -5,7 +7,8 @@ from libs.ssd1306 import SSD1306_I2C
 # WARNING! Pins are hardcoded
 class Display:
     def __init__(self):
-        self.di2c = I2C(0, sda=Pin(0), scl=Pin(1))
+        self.di2c = I2C(1, sda=Pin(2), scl=Pin(3))
+        time.sleep_ms(100)
         self.d = SSD1306_I2C(128, 64, self.di2c)
         self.rows = 0
         self.cols = 0
