@@ -10,7 +10,6 @@ from libs.displayLib import Display
 from libs.APDS9960LITE import APDS9960LITE
 
 import libs.Webserver as web
-import libs.stateManager as sm
 
 def state_initialise(env: dict, *args) -> str:
     # Used in delta-time calculations
@@ -41,4 +40,3 @@ def state_initialise(env: dict, *args) -> str:
 
     return "readSensor"
 
-sm.registerState("initialise", state_initialise)

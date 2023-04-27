@@ -1,6 +1,5 @@
 import time
 from libs.US import dist_mm
-import libs.stateManager as sm
 
 def state_readSensor(env:dict, *args:any) -> str:
     env.dt = (float(time.ticks_ms()) - env.lastUpdated)/1000.0
@@ -25,5 +24,3 @@ def state_readSensor(env:dict, *args:any) -> str:
 
 
     return env.robot_state
-
-sm.registerState("readSensor", state_readSensor)

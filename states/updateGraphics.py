@@ -1,6 +1,4 @@
 import time
-from libs.US import dist_mm
-import libs.stateManager as sm
 
 def state_updateGraphics(env:dict, *args:any) -> str:
 
@@ -18,5 +16,3 @@ def state_updateGraphics(env:dict, *args:any) -> str:
         env.lastDisplayed = float(time.ticks_ms())
 
     return "readSensor"
-
-sm.registerState("updateGraphics", state_updateGraphics)
