@@ -32,6 +32,8 @@ def updateState(*args) -> str:
     env.state = state
     state = states[state](args)
     env.state = state
+
+    env.motors.applyDuty()
     return state
 def raiseError(msg):
     print(f"Error in <{state}>: ".join(msg))

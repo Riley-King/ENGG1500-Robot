@@ -8,8 +8,12 @@ def state_readSensor(env:dict, *args:any) -> str:
 
     # Read all IR Sensor values in accordance to how they were initialised in states/initialise.py
     env.ir = []
-    for i in env._ir_pins:
+    for i in env.ir_pins:
         env.ir.append(i.value())
+
+    env.ir_adc = []
+    for i in env.ir_adc:
+        env.ir_adc.append(i.read_u16())
 
     env.us_dist = dist_mm()
     env.prox_dist = env.apds9960.prox.proximityLevel

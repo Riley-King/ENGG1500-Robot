@@ -1,5 +1,5 @@
 # Import pre-existing libs
-from machine import Pin, I2C
+from machine import Pin, I2C, ADC
 import time
 
 
@@ -26,7 +26,8 @@ def state_initialise(env: dict, *args) -> str:
         env.web = web
 
     # Create I/O devices such as sensors and motors
-    env._ir_pins = [Pin(27), Pin(28), Pin(26)]
+    env.ir_pins = [Pin(19), Pin(27), Pin(28), Pin(26), Pin(22)]
+    env._ir_adc_pins = [ADC(env.ir_pins[2]), ADC(env.ir_pins[3]), ADC(env.ir_pins[4])]
     env.motors = MotorPair()
     env.encoder = EncoderPair()
 
