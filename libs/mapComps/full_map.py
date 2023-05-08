@@ -14,6 +14,7 @@ from libs.mapComps.sharpturn import sharp_turn_path, sharp_turn_walls
 from libs.mapComps.straightline import straightline_path, straightline_walls
 from libs.mapComps.widesharp import widesharp_path, widesharp_walls
 
+
 def _joinComp(a : list, b : list, b_x : float, b_y : float):
     for i in b:
         j = i.copy()

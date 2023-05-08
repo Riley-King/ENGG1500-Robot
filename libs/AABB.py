@@ -13,6 +13,24 @@ class AABB:
         self.w += x_scale
         self.h += y_scale
         return self
+
+    # TODO: Rotate collider by 90 degree increments clockwise
+    def rotate90(self, rotation : int):
+        assert(False, "Not Implemented - Needs to rotate width and height. Must also be relative to rect center")
+        rotation %= 4
+        x, y = self.x, self.y
+        if rotation == 0:
+            self.x, self.y = x, y
+        elif rotation == 1:
+            self.x, self.y = -y, x
+        elif rotation == 2:
+            self.x, self.y = -x, -y
+        elif rotation == 3:
+            self.x, self.y = y, -x
+
+        return self
+
+
     def area(self):
         return self.w*self.h
     def doesIntersect(self, other):
@@ -20,6 +38,8 @@ class AABB:
             (self.y+self.h) >= other.y and (other.y+other.h) >= self.y
 
     def __copy__(self):
+        return AABB(self.x, self.y, self.w, self.h)
+    def copy(self):
         return AABB(self.x, self.y, self.w, self.h)
 
     # https://stackoverflow.com/q/25349178

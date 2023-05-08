@@ -10,7 +10,7 @@ def createAABB(px,py,pw,ph):
 converge_bottom_path = []
 converge_bottom_walls = []
 # Bottom-Central Black Line
-converge_bottom_track.append(createAABB(1578, 1621, 150, 717))
+converge_bottom_path.append(createAABB(1578, 1621, 150, 717))
 # Left Wall
 converge_bottom_walls.append(createAABB(329, 0, 267, 540))
 converge_bottom_walls.append(createAABB(438, 540, 267, 540))
