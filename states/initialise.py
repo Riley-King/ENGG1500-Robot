@@ -2,7 +2,7 @@
 from machine import Pin, I2C, ADC
 import time
 
-
+from libs.Mapper import Mapper
 # Import custom libs/wrappers
 from libs.MotorPair import MotorPair
 from libs.EncoderPair import EncoderPair
@@ -39,5 +39,9 @@ def state_initialise(env: dict, *args) -> str:
     env.apds9960 = APDS9960LITE(apdsi2c)
     env.apds9960.prox.enableSensor()
 
+    env.map = Mapper()
+
+    env.heading = 0
+    env.displacement = [0, 0]
     return "readSensor"
 

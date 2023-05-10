@@ -39,3 +39,10 @@ class EncoderPair:
 
     def getRatios(self):
         return self.getLRRatio(), self.getRLRatio()
+
+    # NOTE: Only calculates error for a specific point in time! It is *highly* recommended to pass l/r offsets
+    def calculateRelError(self, LRDutyRatio: float, l_ofst:float = None, r_ofst:float = None) -> float:
+        if l_ofst is None: l_ofst = self.l_ofst
+        if r_ofst is None: r_ofst = self.r_ofst
+        return (self.enc.get_left() - l_ofst) / (self.enc.get_right() - r_ofst) / LRDutyRatio
+

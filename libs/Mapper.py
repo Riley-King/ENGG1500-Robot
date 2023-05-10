@@ -31,11 +31,13 @@ def _joinComp(a : list, b : list, b_x : float, b_y : float):
         a.append(j)
 
 # TODO: Flip collider in either x- or y- axis. 1's bit means x-axis, 2's bit means y-axis. Should be in Mapper...
-def flip(AABB):
-    return AABB
+def flip(AABBs):
+
+    return AABBs
 class Mapper:
     def __init__(self):
-        self.collider = AABB(0,0,0,0)
+        # TODO: Update this value
+        self.collider = AABB(0,0,0,0.11)
         self.map = []
         self.indexToName = {}
         #                                         TODO,     TODO,
@@ -103,6 +105,9 @@ class Mapper:
     def move(self, dx : float, dy : float):
         self.collider.x += dx
         self.collider.y += dy
+        return self
+    def rotate(self, heading):
+        return self
 
     # Returns the indexes for map path components where they intersect with the collider
     def getPathIntersectionIndexes(self):
@@ -118,7 +123,7 @@ class Mapper:
             if self.collider.doesIntersect(m[1]):
                 walls.append(i)
         return walls
-    def addMapComponent(self, x_offset : float, y_offset : float, f : int, rotation : int, path_AABB, wall_AABB, label):
+    def addMapComponent(self, x_offset : float, y_offset : float, f : int, rotation : int, path_AABB, wall_AABB, label) -> None:
         x_offset = _pxTomm(x_offset)
         y_offset = _pxTomm(y_offset)
 

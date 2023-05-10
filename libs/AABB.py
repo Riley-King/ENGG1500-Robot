@@ -1,3 +1,10 @@
+def _rotate90_vec(x: float, y: float, ang: int, cx:float = 0, cy:float = 0):
+    ang %= 4
+    if ang == 0: return x, y
+    elif ang == 1: return -(cy-y)+cx, cy-(x-cx)
+    elif ang == 2: return (cx-x)+cx, cy-(y-cy)
+    elif ang == 3: return cx + (cy - y), cy - (cx-x)
+    else: assert(False, "HOW did you get here?!")
 class AABB:
     def __init__(self, x : float, y : float, width : float, height : float):
         self.x = x
@@ -14,20 +21,19 @@ class AABB:
         self.h += y_scale
         return self
 
-    # TODO: Rotate collider by 90 degree increments clockwise
+    # DoneTODO: Rotate collider by 90 degree increments clockwise
+    # TODO: Test this implementation
     def rotate90(self, rotation : int):
         assert(False, "Not Implemented - Needs to rotate width and height. Must also be relative to rect center")
-        rotation %= 4
-        x, y = self.x, self.y
-        if rotation == 0:
-            self.x, self.y = x, y
-        elif rotation == 1:
-            self.x, self.y = -y, x
-        elif rotation == 2:
-            self.x, self.y = -x, -y
-        elif rotation == 3:
-            self.x, self.y = y, -x
+        x1, x2 = self.x, self.x+self.w
+        y1, y2 = self.y, self.y+self.h
+        cx, cy = self.x + self.w*0.5, self.y + self.h*0.5
 
+        x1, y1 = _rotate90_vec(x1, y1, rotation, cx=cx, cy=cy)
+        x2, y2 = _rotate90_vec(x2, y2, rotation, cx=cx, cy=cy)
+
+        self.x, self.w = x1, x2-x1
+        self.y, self.h = y1, y2-y1
         return self
 
 

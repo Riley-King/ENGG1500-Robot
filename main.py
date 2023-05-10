@@ -24,6 +24,10 @@ sm.registerState("readSensor", state_readSensor)
 from states.updateGraphics import state_updateGraphics
 sm.registerState("updateGraphics", state_updateGraphics)
 
+from states.updateMap import state_updateMap
+sm.registerState("updateMap", state_updateMap)
+
+
 while True:
     sm.updateState()
 
