@@ -1,50 +1,41 @@
-class dotdict(dict):
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
+class StateManager:
+    def __init__(self, state: str ="None"):
+        self.states: dict = {}
+        self.env = {}
+        self.state: str = state
+        self.env["state"] = self.state
 
-from typing import Callable, Any
+        def state_None(env: dict, *args):
+            print("State became none")
+            exit(-1)
+        def state_Error(env: dict, *args):
+            print(f"A state error occurred")
+            if env.err is not None: print(env.err)
+            exit(-2)
 
-states = {}
-state = "None"
-env = dotdict({})
+        self.registerState("None", state_None)
+        self.registerState("Error", state_Error)
 
-def isState(label: str) -> bool:
-    return states[label] is None
+    def isState(self, label: str) -> bool:
+        return label in self.states
 
-def registerState(label: str, fn: Callable[[dict, Any], str]) -> (bool, str):
-    if isState(label):
-        states[label] = fn
-        return (True, "")
-    else:
-        return (False, f"The state \"{label}\" has already been registered")
+    def registerState(self, label: str, fn) -> None:
+        if not self.isState(label):
+            self.states[label] = fn
+        else:
+            raise RuntimeError(f"State \"{self.state}\" already registered")
 
-def clearState(label: str) -> (bool, str):
-    if isState(label):
-        states[label] = None
-        return (True, "")
-    else:
-        return (False, f"The state \"{label}\" does not exist")
-def updateState(*args) -> str:
-    global state
-    if not isState(state):
-        raiseError("No such state exists")
-    env.state = state
-    state = states[state](args)
-    env.state = state
+    def removeState(self, label: str) -> None:
+        if self.isState(label):
+            self.states[label] = None
+        else:
+            raise RuntimeError(f"State \"{self.state}\" does not exist")
 
-    env.motors.applyDuty()
-    return state
-def raiseError(msg):
-    print(f"Error in <{state}>: ".join(msg))
-    return "Error"
-
-def state_Error(env: dict, *args: Any) -> str:
-    print("An error has occurred.")
-    exit(-2)
-def state_None(env: dict, *args: Any) -> str:
-    print("Default None state is not valid. Set an initial state before running")
-    exit(-1)
-
-registerState("Error", state_Error)
-registerState("None", state_None)
+    def updateState(self, *args):
+        if self.isState(self.state):
+            self.env["state"] = self.state
+            self.state = self.states[self.state](self.env, args)
+            self.env["state"] = self.state
+            self.env["motors"].applyDuty()
+        else:
+            raise RuntimeError(f"State \"{self.state}\" does not exist")

@@ -10,27 +10,31 @@ from libs.displayLib import Display
 from libs.APDS9960LITE import APDS9960LITE
 def state_initialise(env: dict, *args) -> str:
     # Used in delta-time calculations
-    env.lastUpdated = float(time.ticks_ms())
+    env["lastUpdated"] = float(time.ticks_ms())
     # Define the robots logical state
-    env.robot_state = "followLine"
+    env["robot_state"] = "followLine"
 
     # Create I/O devices such as sensors and motors
-    env.ir_pins = [Pin(19), Pin(27), Pin(28), Pin(26), Pin(22)]
-    env._ir_adc_pins = [ADC(env.ir_pins[2]), ADC(env.ir_pins[3]), ADC(env.ir_pins[4])]
-    env.motors = MotorPair()
-    env.encoder = EncoderPair()
+    env["ir_pins"] = [Pin(22), Pin(19)]
+    env["_ir_adc_pins"] = [ADC(Pin(27)), ADC(Pin(28)), ADC(Pin(26))]
+    env["motors"] = MotorPair()
+    env["encoder"] = EncoderPair()
+    env["encL"] = (0,0)
+    env["encR"] = (0,0)
 
-    env.display = Display()
-    env.display.clear()
-    env.lastDisplayed = 0
+    env["display"] = Display()
+    env["display"].clear()
+    env["lastDisplayed"] = 0
 
-    apdsi2c = I2C(0, scl=Pin(21), sda=Pin(20))
-    env.apds9960 = APDS9960LITE(apdsi2c)
-    env.apds9960.prox.enableSensor()
+    # WARN: not currently plugged in
+    #apdsi2c = I2C(0, scl=Pin(21), sda=Pin(20))
+    #env["apds9960"] = APDS9960LITE(apdsi2c)
+    #env["apds9960"].prox.enableSensor()
 
-    env.map = Mapper()
+    env["map"] = Mapper()
 
-    env.heading = 0
-    env.displacement = [0, 0]
+    env["heading"] = 0
+    env["displacement"] = [0, 0]
+
     return "readSensor"
 

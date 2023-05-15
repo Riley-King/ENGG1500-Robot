@@ -1,4 +1,4 @@
-import libs.stateManager as sm
+from libs.stateManager import StateManager
 
 ## Just some code that is not included in state_readSensor or state_initialise
 #print(f"Prox, Sonic")
@@ -11,6 +11,8 @@ import libs.stateManager as sm
 #    print(f"{prox:3d}, {sonic_dist:4.2f}")
 #    time.sleep_ms(200)
 
+sm = StateManager()
+
 from states.initialise import state_initialise
 sm.state = "initialise"
 sm.registerState("initialise", state_initialise)
@@ -20,9 +22,6 @@ sm.registerState("followLine", state_followLine)
 
 from states.readSensor import state_readSensor
 sm.registerState("readSensor", state_readSensor)
-
-from states.updateGraphics import state_updateGraphics
-sm.registerState("updateGraphics", state_updateGraphics)
 
 from states.updateMap import state_updateMap
 sm.registerState("updateMap", state_updateMap)
