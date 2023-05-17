@@ -66,8 +66,8 @@ def state_readSensor(env:dict, *args:any) -> str:
     env["displacement"][1] += math.sin(env["heading"]*(3.1415/360))*vel
 
     env["display"].clear()
+
     env["display"].text(env["state"])
     env["display"].text(f"Ang:{str(env['heading'])}")
-    env["display"].show()
 
     return "updateMap"

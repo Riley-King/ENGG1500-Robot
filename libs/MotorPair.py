@@ -23,6 +23,5 @@ class MotorPair:
 
     # Sets the underlying motor drivers PWM to the classes values
     def applyDuty(self):
-        print(f"Set motor duty to {self.pwm_l}/{self.pwm_r}")
-        self.left_motor.duty(self.pwm_l)
-        self.right_motor.duty(self.pwm_r)
+        self.left_motor.duty(int(self.pwm_l))
+        self.right_motor.duty(int(self.pwm_r))
