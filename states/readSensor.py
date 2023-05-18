@@ -32,32 +32,6 @@ def state_readSensor(env:dict, *args:any) -> str:
     env["encR"] = (env["encoder"].getRight(), (env["encoder"].getRight() - env["encR"][1])/env["dt"])
 
 
-    # Consider calculating angle as angle where radius is 0.11 using theta = (360*C)/(2pi*r)
-    # TODO: Verify Heading Result
-    # From Aircraft turn angles: R = v^2 / (11.26 * tan(theta))
-    # And; omega = (1091 * tan(theta)) / v
-    #   Expression is in imperial; velocity is in knots, R is in feet
-    #   Should velocity be average, difference, distance, max, min?
-
-    # Constant in parentheses is unit conversions from one encoder click to meters
-    #_enc_vel = math.sqrt(env.encL[1]**2 + env.encR[1]**2)*0.5*(0.010209875)
-
-    # Calculate tan result, should the right motor be zero set tan to zero
-    #_tan_val = 0
-    #if env.encR[0] == env.encL[0]:
-    #    _tan_val = 0
-    #elif env.encR[0] > 0 and env.encL[0] == 0:
-    #    # TODO
-    #    # 0.11
-    #
-    #elif env.encL[0] > 0 and env.encR[0] == 0:
-    #    # TODO
-    #    pass
-    #else:
-    #    _tan_val = (env.encL[0]/env.encR[0])
-#
-    #env.turn_radius = _enc_vel**2 / (3.432 * _tan_val)
-    #env.heading += (1091 * _tan_val) / _enc_vel
     _enc_dist = (env["encL"][0] - env["encR"][0])*0.010209875
     env["heading"] = (153.84*_enc_dist)/(2*3.1415*0.11) % 360 - 180
 

@@ -17,8 +17,8 @@ def state_initialise(env: dict, *args) -> str:
     # Create I/O devices such as sensors and motors
     env["ir_pins"] = [Pin(22), Pin(19)]
     env["_ir_adc_pins"] = [ADC(Pin(27)), ADC(Pin(28)), ADC(Pin(26))]
-    env["motors"] = MotorPair()
     env["encoder"] = EncoderPair()
+    env["motors"] = MotorPair(env["encoder"])
     env["encL"] = (0,0)
     env["encR"] = (0,0)
 

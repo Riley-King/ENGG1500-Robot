@@ -1,8 +1,13 @@
+import time
+
 from libs.motorLib import Motor
+from libs.encoderLib import Encoder
+
+MAX_STALL_PREVENT = 30
 
 # WARNING: left and right motor pins are hard-coded in the class!!!
 class MotorPair:
-    def __init__(self):
+    def __init__(self, encoderPair):
         # Hold a local value for our targeted PWM for L+R
         #   as to enable fast and efficient changes of its value
         self.pwm_l = 50
@@ -11,6 +16,11 @@ class MotorPair:
         self.right_motor = Motor("right", 11, 10, 7)
         self.left_motor.set_forwards()
         self.right_motor.set_forwards()
+
+        self.enc = encoderPair
+        self.last_pos = (0,0)
+        self.stall_pwm = [0, 0]
+        self.last_check = 0
 
     # Sets/Gets the pwm class variables.
     # If not arguments are provided, returns pwm_l, pwm_r
@@ -23,5 +33,30 @@ class MotorPair:
 
     # Sets the underlying motor drivers PWM to the classes values
     def applyDuty(self):
-        self.left_motor.duty(int(self.pwm_l))
-        self.right_motor.duty(int(self.pwm_r))
+        self.left_motor.duty(int(max(min(self.pwm_l + self.stall_pwm[0], 100), 0)))
+        self.right_motor.duty(int(max(min(self.pwm_r + self.stall_pwm[1], 100), 0)))
+        self._checkStall()
+
+    def _checkStall(self):
+        return "Not Implemented"
+
+        cur_pos = self.enc.get()
+        dt = time.ticks_ms() - self.last_check
+        if dt < 0.5: return
+        self.last_check = time.ticks_ms()
+        dt /= 1000
+        vel = [cur_pos[0] - self.last_pos[0], cur_pos[1] - self.last_pos[1]]
+        self.last_pos = cur_pos
+
+        if vel[0] == 0 and self.pwm_l > 0:
+            self.stall_pwm[0] += 1
+        else:
+            self.stall_pwm[0] -= 1
+
+        if vel[1] == 0 and self.pwm_r > 0:
+            self.stall_pwm[1] += 1
+        else:
+            self.stall_pwm[1] -= 1
+
+        self.stall_pwm[0] = min(self.stall_pwm[0], MAX_STALL_PREVENT)
+        self.stall_pwm[1] = min(self.stall_pwm[1], MAX_STALL_PREVENT)
