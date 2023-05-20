@@ -4,6 +4,7 @@ class StateManager:
         self.env = {}
         self.state: str = state
         self.env["state"] = self.state
+        self.env["sm"] = self
 
         def state_None(env: dict, *args):
             print("State became none")
@@ -30,6 +31,12 @@ class StateManager:
             self.states[label] = None
         else:
             raise RuntimeError(f"State \"{self.state}\" does not exist")
+
+    def callState(self, label, *args):
+        if self.isState(label):
+            return self.state[label](self.env, args)
+        else:
+            raise RuntimeError(f"State \"{label}\" does not exist")
 
     def updateState(self, *args):
         if self.isState(self.state):

@@ -1,101 +1,94 @@
-# TODO:
-#  - Increase the correction factor
-#       - Turns too slow on a roundabout
-#  - Prevent it from entering into an orbit around a path
-#       - Occurs when entering near perpendicularly to a line
 import math
 import time
 from libs.US import dist_mm
 
+# ===============
+#  Desired Logic
+# ===============
+
+# If all sensors are 'on',
+#   then we are perpendicular to a piece of track such as an intersection, or
+#   we overcorrected on a turn
+
+# If all sensors are 'off';
+#   Check if we are in the garage, if so
+#       enter garage mode
+#   Check if we are in a hallway, if so
+#       enter hallway mode
+#   Otherwise we lost the track,
+#       slow down and shuffle left and right
+
+# If only the left sensor is 'on', then we need to
+#   turn left
+# If only the right sensor is 'on', then we need to
+#   turn right
+# If only the center sensor is 'on', then we should
+#   try to stay straight
+
+# If the far_right sensor is on, and we are at a roundabout, then
+#   Convert the noisy pulses to a single pulse, and
+#   use this single pulse to increment exit counter
+# Else if we are not at a roundabout, then
+#   stop and turn right until heading is aligned to a 90 deg increment
+# If the far_left sensor is on, then
+#   stop and turn left until the heading is aligned to a 90 deg increment
+
+
 # Params for handling IR readings
-avg_weight = 0.1       # How much should the average affect this iteration
-avg_acc_weight = 1      # How much of the current average be present in the future average
-avg_num_samples = 20    # How large of a window does the moving average have
-prev_vals_weight = 0    # How much of the previous IR values should be used if all IRs are white
-ignore_vals = [         # Below what threshold should IR readings be rounded to zero
-    1750, 200, 1700     # ^^^
-]                       # ^^^
-x_factor = [-15, 0, 15] # Distance from the center IR sensor
-line_err_offset = 0     # Offset for line_error variable
-line_err_max_mag = 20   # Maximum magnitude for the line error value
+x_factor = [-25, 0, 25] # Distance from the center IR sensor
 
 # Motor power settings
 base_pwm = 30           # Base PWM for the motors
-min_pwm = 24            # Lowest possible PWM
-max_pwm = 50            # Highest possible PWM
+min_pwm = 24            # Minimum PWM for the motors
+max_pwm = 60            # Maximum PWM for the motors
 pwm_scale = (1, 1.13)   # Scales each wheels PWM outside of range checks
-correction_factor = 4   # How hard/fast should responses be to line_error
+correction_factor = 3   # How hard/fast should responses be to line_error
 
-# State globals - Please Ignore
-avg_last_vals = [0, 0, 0]
-prev_vals = [0, 0, 0]
+prev_pwms = [base_pwm, base_pwm]
 
 def state_followLine(env: dict, *args: any) -> str:
-    # Compute the current IR reading by mixing raw readings with a weighted average reading
-    ir_l = (env["ir_adc"][0] + avg_last_vals[0]*avg_weight)/2
-    ir_c = (env["ir_adc"][1] + avg_last_vals[1]*avg_weight)/2
-    ir_r = (env["ir_adc"][2] + avg_last_vals[2]*avg_weight)/2
+    ir_l = env["ir_adc"][0]
+    ir_c = env["ir_adc"][1]
+    ir_r = env["ir_adc"][2]
 
-    # If the values are below a certain threshold, set them to zero
-    if ir_l < ignore_vals[0]: ir_l = 0
-    if ir_c < ignore_vals[1]: ir_c = 0
-    if ir_r < ignore_vals[2]: ir_r = 0
-
-    # Compute future average
-    avg_last_vals[0] += (env["ir_adc"][0] - avg_last_vals[0]*avg_acc_weight) / avg_num_samples
-    avg_last_vals[1] += (env["ir_adc"][1] - avg_last_vals[1]*avg_acc_weight) / avg_num_samples
-    avg_last_vals[2] += (env["ir_adc"][2] - avg_last_vals[2]*avg_acc_weight) / avg_num_samples
-
-    # If ALL IR sensors are below their thresholds,
-    #   set IR readings to a previous value and prevent updating the previous value
-    block_prev_update = False
-    if ir_l == 0 and ir_c == 0 and ir_r == 0:
-        ir_l = prev_vals[0]*prev_vals_weight
-        ir_c = prev_vals[1]*prev_vals_weight
-        ir_r = prev_vals[2]*prev_vals_weight
-        block_prev_update = True
-
-    print(f"IR: {ir_l} | {ir_c} | {ir_r}")
-
-    # Compute the numerator of a weighted average
     num = x_factor[0]*ir_l + \
-          x_factor[1]*ir_c + \
-          x_factor[2]*ir_r
+        x_factor[1]*ir_c + \
+        x_factor[2] * ir_r
 
-    # Compute the denominator of the weighted average
-    den = ir_l + ir_c + ir_r
-    # Ensure the denominator is not zero
-    if den == 0: den = 999999
+    dem = ir_l + ir_c + ir_r
 
-    # Compute the line error
-    line_err = num / den + line_err_offset
+    line_error = -int(num / dem)
 
-    # Bound the line error value
-    if line_err > line_err_max_mag:
-        line_err = line_err_max_mag
-    elif line_err < -line_err_max_mag:
-        line_err = -line_err_max_mag
+    pwm_l = base_pwm + correction_factor * line_error
+    pwm_r = base_pwm - correction_factor * line_error
 
-    # Compute the Left and Right motor PWMs
-    pwm_l = base_pwm - correction_factor * line_err
-    pwm_r = base_pwm + correction_factor * line_err
+    pwm_l = min(max(min_pwm, pwm_l), max_pwm)
+    pwm_r = min(max(min_pwm, pwm_r), max_pwm)
 
-    # Ensure that PWMs are greater or equal to the min
-    pwm_l = min(max(pwm_l, min_pwm), max_pwm) * pwm_scale[0]
-    pwm_r = min(max(pwm_r, min_pwm), max_pwm) * pwm_scale[1]
+    # If the center sees the line, but the left and right do not, we are likely perfectly on the line
+    if (ir_l < 2000) and (ir_c > 2000) and (ir_r < 2000):
+        pwm_l = base_pwm
+        pwm_r = base_pwm
 
+    doNotUpdatePrevPWM = False
+    if (ir_l < 2000) and (ir_c < 2000) and (ir_r < 2000):
+        pwm_l = prev_pwms[0]
+        pwm_r = prev_pwms[1]
+        doNotUpdatePrevPWM = True
+    elif (ir_l > 2000) and (ir_c > 2000) and (ir_r > 2000):
+        pwm_l = base_pwm
+        pwm_r = base_pwm + correction_factor*10
 
     # Apply the PWMs
-    env["motors"].duty(pwm_l=pwm_l, pwm_r=pwm_r)
+    env["motors"].duty(pwm_l=pwm_l*pwm_scale[0], pwm_r=pwm_r*pwm_scale[1])
 
     # Update the display with some values
     env["display"].text(f"PWM: {int(pwm_l)}|{int(pwm_r)}")
-    env["display"].text(f"ERR: {int(line_err)}")
+    env["display"].text(f"ERR: {int(line_error)}")
     env["display"].show()
 
-    if not block_prev_update:
-        prev_vals[0] = ir_l
-        prev_vals[1] = ir_c
-        prev_vals[2] = ir_r
+    if not doNotUpdatePrevPWM:
+        prev_pwms[0] = pwm_l
+        prev_pwms[1] = pwm_r
 
     return "readSensor"
