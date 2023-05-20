@@ -8,21 +8,21 @@ import time
 from libs.US import dist_mm
 
 # Params for handling IR readings
-avg_weight = -0.1       # How much should the average affect this iteration
+avg_weight = 0.1       # How much should the average affect this iteration
 avg_acc_weight = 1      # How much of the current average be present in the future average
 avg_num_samples = 20    # How large of a window does the moving average have
-prev_vals_weight = -0.6 # How much of the previous IR values should be used if all IRs are white
+prev_vals_weight = 0    # How much of the previous IR values should be used if all IRs are white
 ignore_vals = [         # Below what threshold should IR readings be rounded to zero
-    1728, 152, 1608     # ^^^
+    1750, 200, 1700     # ^^^
 ]                       # ^^^
 x_factor = [-15, 0, 15] # Distance from the center IR sensor
 line_err_offset = 0     # Offset for line_error variable
-line_err_max_mag = 10   # Maximum magnitude for the line error value
+line_err_max_mag = 20   # Maximum magnitude for the line error value
 
 # Motor power settings
-avg_pwm = 30            # Base PWM for the motors
-min_pwm = 26            # Lowest possible PWM
-max_pwm = 48            # Highest possible PWM
+base_pwm = 30           # Base PWM for the motors
+min_pwm = 24            # Lowest possible PWM
+max_pwm = 50            # Highest possible PWM
 pwm_scale = (1, 1.13)   # Scales each wheels PWM outside of range checks
 correction_factor = 4   # How hard/fast should responses be to line_error
 
@@ -68,7 +68,7 @@ def state_followLine(env: dict, *args: any) -> str:
     if den == 0: den = 999999
 
     # Compute the line error
-    line_err = int(num / den) + line_err_offset
+    line_err = num / den + line_err_offset
 
     # Bound the line error value
     if line_err > line_err_max_mag:
@@ -77,8 +77,8 @@ def state_followLine(env: dict, *args: any) -> str:
         line_err = -line_err_max_mag
 
     # Compute the Left and Right motor PWMs
-    pwm_l = avg_pwm - correction_factor*line_err
-    pwm_r = avg_pwm + correction_factor*line_err
+    pwm_l = base_pwm - correction_factor * line_err
+    pwm_r = base_pwm + correction_factor * line_err
 
     # Ensure that PWMs are greater or equal to the min
     pwm_l = min(max(pwm_l, min_pwm), max_pwm) * pwm_scale[0]
@@ -89,8 +89,8 @@ def state_followLine(env: dict, *args: any) -> str:
     env["motors"].duty(pwm_l=pwm_l, pwm_r=pwm_r)
 
     # Update the display with some values
-    env["display"].text(f"PWM: {pwm_l}|{pwm_r}")
-    env["display"].text(f"ERR: {line_err}")
+    env["display"].text(f"PWM: {int(pwm_l)}|{int(pwm_r)}")
+    env["display"].text(f"ERR: {int(line_err)}")
     env["display"].show()
 
     if not block_prev_update:
