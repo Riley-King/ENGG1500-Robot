@@ -42,21 +42,15 @@ class MotorPair:
 
         cur_pos = self.enc.get()
         dt = time.ticks_ms() - self.last_check
-        if dt < 0.5: return
-        self.last_check = time.ticks_ms()
-        dt /= 1000
-        vel = [cur_pos[0] - self.last_pos[0], cur_pos[1] - self.last_pos[1]]
+        if dt < 250: return
+
+        l_vel = cur_pos[0] - self.last_pos[0]
+        r_vel = cur_pos[1] - self.last_pos[1]
+
+        if l_vel < 1 and self.pwm_l != 0: self.stall_pwm[0] += 5
+        else: self.stall_pwm[0] = 0
+        if r_vel < 1 and self.pwm_r != 0: self.stall_pwm[1] += 5
+        else: self.stall_pwm[1] = 0
+
         self.last_pos = cur_pos
-
-        if vel[0] == 0 and self.pwm_l > 0:
-            self.stall_pwm[0] += 1
-        else:
-            self.stall_pwm[0] -= 1
-
-        if vel[1] == 0 and self.pwm_r > 0:
-            self.stall_pwm[1] += 1
-        else:
-            self.stall_pwm[1] -= 1
-
-        self.stall_pwm[0] = min(self.stall_pwm[0], MAX_STALL_PREVENT)
-        self.stall_pwm[1] = min(self.stall_pwm[1], MAX_STALL_PREVENT)
+        self.last_check = time.ticks_ms()
